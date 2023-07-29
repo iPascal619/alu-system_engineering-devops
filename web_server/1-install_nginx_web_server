@@ -4,12 +4,22 @@
 sudo apt-get update
 sudo apt-get -y install nginx
 
-# Configure Nginx to listen on port 80
-sudo sed -i 's/listen 80 default_server;/listen 80;/' /etc/nginx/sites-available/default
-
 # Create a custom HTML page with the string "Holberton School"
 echo "Holberton School for the win!" | sudo tee /var/www/html/index.html > /dev/null
 
+# Configure Nginx to listen on port 80 and return the custom HTML page at the root
+sudo bash -c 'cat << EOF > /etc/nginx/sites-available/default
+server {
+    listen 80;
+    root /var/www/html;
+    index index.html;
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOF'
+
 # Restart Nginx to apply the changes
 sudo service nginx restart
+
 
