@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 # Description: Configure Nginx to redirect /redirect_me to https://www.youtube.com/watch?v=QH2-TGUlwu4 with "301 Moved Permanently"
 
-# Step 1: Install Nginx if not already installed
+# Install Nginx if not already installed
 if ! command -v nginx &> /dev/null; then
     sudo apt update
     sudo apt install -y nginx
 fi
 
 # Configure the Nginx server to handle the redirection
-
-# Create a new configuration file for redirection
 sudo tee /etc/nginx/sites-available/redirect_me > /dev/null << EOF
 server {
     listen 80;
@@ -18,8 +16,6 @@ server {
     location /redirect_me {
         return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
     }
-
-    # You can include other server configurations here if needed
 }
 EOF
 
@@ -29,15 +25,7 @@ sudo ln -sf /etc/nginx/sites-available/redirect_me /etc/nginx/sites-enabled/
 # Test the Nginx configuration for syntax errors
 sudo nginx -t
 
-# If  syntax test is successful, reload Nginx to apply the changes
+# If the syntax test is successful, reload Nginx to apply the changes
 sudo systemctl reload nginx
 
-# Clean up unnecessary default configurations
-sudo rm /etc/nginx/sites-available/default
-sudo rm /etc/nginx/sites-enabled/default
-
-# Optional: Restart Nginx to apply clean-up changes
-# sudo systemctl restart nginx
-
 echo "Nginx redirection configuration is complete. /redirect_me will redirect to https://www.youtube.com/watch?v=QH2-TGUlwu4 with '301 Moved Permanently' status."
-
