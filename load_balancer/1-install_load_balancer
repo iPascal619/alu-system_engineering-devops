@@ -1,39 +1,16 @@
 #!/usr/bin/env bash
-# This Bash script installs and configures HAProxy on a new Ubuntu machine to meet the task requirements:
-# 1. Send traffic to web-01 and web-02 with a round-robin algorithm.
-# 2. Manage HAProxy via an init script.
-# 3. Configure servers with the right hostnames: 606229561-web-01 and 606229561-web-02.
+#Bash script that installs HAProxy & makes configurations
 
-# Replace [STUDENT_ID] with your actual student ID
-STUDENT_ID="606229561"
-
-# Update the hostname to match the first server
-sudo hostnamectl set-hostname "${STUDENT_ID}-web-01"
-
-# Update /etc/hosts to include the hostnames
-echo "127.0.0.1 ${STUDENT_ID}-web-01 ${STUDENT_ID}-web-02" | sudo tee -a /etc/hosts
-
-# Install HAProxy
-sudo apt update
-sudo apt install -y haproxy
-
-# Configure HAProxy
-cat <<EOF | sudo tee /etc/haproxy/haproxy.cfg
-frontend http_frontend
+apt-get -y install software-properties-common
+add-apt-repository ppa:vbernat/haproxy-1.8
+apt-get update
+apt-get -y install haproxy
+echo "ENABLED=1" >> /etc/default/haproxy
+printf %s "listen 5498-web
     bind *:80
     mode http
-    default_backend http_backend
-
-backend http_backend
-    mode http
     balance roundrobin
-    server web01 ${STUDENT_ID}-web-01:80 check
-    server web02 ${STUDENT_ID}-web-02:80 check
-EOF
-
-# Enable HAProxy to be managed via an init script
-sudo systemctl enable haproxy
-sudo systemctl start haproxy
-
-# Restart HAProxy to apply the changes
-sudo systemctl restart haproxy
+    server 5498-web-01 54.172.222.35:80 check
+    server 5498-web-02 34.228.57.162:80 check
+" >> /etc/haproxy/haproxy.cfg
+sudo service haproxy restart
