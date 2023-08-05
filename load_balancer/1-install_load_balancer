@@ -4,10 +4,10 @@
 # 2. Manage HAProxy via an init script.
 # 3. Configure servers with the right hostnames: 606229561-web-01 and 606229561-web-02.
 
-# Replace [STUDENT_ID] with student ID
+# Replace [STUDENT_ID] with your actual student ID
 STUDENT_ID="606229561"
 
-# Update hostname to match the first server
+# Update the hostname to match the first server
 sudo hostnamectl set-hostname "${STUDENT_ID}-web-01"
 
 # Update /etc/hosts to include the hostnames
@@ -35,3 +35,5 @@ EOF
 sudo systemctl enable haproxy
 sudo systemctl start haproxy
 
+# Restart HAProxy to apply the changes
+sudo systemctl restart haproxy
