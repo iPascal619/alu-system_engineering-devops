@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # This Bash script installs and configures HAProxy on a new Ubuntu machine to meet the task requirements:
 # 1. Send traffic to web-01 and web-02 with a round-robin algorithm.
 # 2. Manage HAProxy via an init script.
