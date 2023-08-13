@@ -1,7 +1,42 @@
 #!/usr/bin/env bash
-# Configure nginx server redirecting to another page
-sudo apt-get update
-sudo apt-get -y install nginx
-newlines="\\\trewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;"
-sudo sed -i "53i $newlines" /etc/nginx/sites-available/default
-sudo service nginx restart
+# Description: Configure Nginx to redirect /redirect_me to https://www.youtube.com/watch?v=QH2-TGUlwu4 with "301 Moved Permanently"
+
+#Install Nginx if not already installed
+if ! command -v nginx &> /dev/null; then
+    sudo apt update
+    sudo apt install -y nginx
+fi
+
+# Configure the Nginx server to handle the redirection
+
+# Create a new configuration file for redirection
+sudo tee /etc/nginx/sites-available/redirect_me > /dev/null << EOF
+server {
+    listen 80;
+    server_name _;
+
+    location /redirect_me {
+        rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;
+    }
+
+    # You can include other server configurations here if needed
+}
+EOF
+
+# Create a symbolic link to enable the configuration
+sudo ln -sf /etc/nginx/sites-available/redirect_me /etc/nginx/sites-enabled/
+
+# Test the Nginx configuration for syntax errors
+sudo nginx -t
+
+# If the syntax test is successful, reload Nginx to apply the changes
+sudo systemctl reload nginx
+
+# Clean up unnecessary default configurations 
+sudo rm /etc/nginx/sites-available/default
+sudo rm /etc/nginx/sites-enabled/default
+
+# sudo systemctl restart nginx
+
+echo "Nginx redirection configuration is complete. /redirect_me will redirect to https://www.youtube.com/watch?v=QH2-TGUlwu4."
+
