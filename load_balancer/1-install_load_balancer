@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-
 # This Bash script installs and configures HAProxy on a new Ubuntu machine to meet the task requirements:
 # 1. Send traffic to web-01 and web-02 with a round-robin algorithm.
 # 2. Manage HAProxy via an init script.
 # 3. Configure servers with the right hostnames: 606229561-web-01 and 606229561-web-02.
 
 # Replace [STUDENT_ID] with your actual student ID
-STUDENT_ID="606229561"
+STUDENT_ID="5660"
 
 # Update the hostname to match the first server
 sudo hostnamectl set-hostname "${STUDENT_ID}-web-01"
@@ -20,19 +19,34 @@ sudo apt install -y haproxy
 
 # Configure HAProxy
 cat <<EOF | sudo tee /etc/haproxy/haproxy.cfg
-frontend http_frontend
-    bind *:80
-    mode http
-    default_backend http_backend
+global
+    daemon
+    maxconn 256
 
-backend http_backend
+defaults
     mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+
+backend webservers
     balance roundrobin
-    server web01 ${STUDENT_ID}-web-01:80 check
-    server web02 ${STUDENT_ID}-web-02:80 check
+    server web-01  ${STUDENT_ID}-web-01:80 check
+    server web-02  ${STUDENT_ID}-web-02:80 check
+
+frontend http-in
+    bind *:80
+    bind *:443 ssl crt /etc/letsencrypt/archive/www.pascalo.tech/www.pascalo.tech.pem
+    mode http
+    default_backend webservers
 EOF
+
+# Generate DH parameters
+sudo openssl dhparam -out /etc/haproxy/dhparam.pem 2048
 
 # Enable HAProxy to be managed via an init script
 sudo systemctl enable haproxy
 sudo systemctl start haproxy
+
+echo "HAProxy configuration is complete."
 
